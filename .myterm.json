@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "name": "amundi2",
+  "theme": "system",
+  "defaults": {
+    "shell": "pwsh",
+    "cwd": "."
+  },
+  "panes": [
+    {
+      "id": "pane-1",
+      "title": "",
+      "cwd": "."
+    },
+    {
+      "id": "pane-2",
+      "title": "",
+      "cwd": "."
+    },
+    {
+      "id": "pane-3",
+      "title": "",
+      "cwd": "."
+    },
+    {
+      "id": "pane-4",
+      "title": "",
+      "cwd": "."
+    },
+    {
+      "id": "pane-5",
+      "title": "",
+      "cwd": "."
+    },
+    {
+      "id": "pane-6",
+      "title": "",
+      "cwd": "."
+    }
+  ]
+}

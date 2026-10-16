@@ -1,0 +1,29 @@
+<section class="rounded-xl border bg-card p-4 shadow-sm">
+  <header class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 class="text-lg font-semibold">{{ quote()?.name ?? 'Amundi' }} <span class="text-sm font-normal text-muted-foreground">{{ quote()?.symbol ?? 'AMUN.PA' }}</span></h2>
+      @if (quote(); as q) {
+        <p data-testid="price" class="text-3xl font-bold tabular-nums">
+          {{ q.price.toFixed(2) }} {{ q.currency }}
+          <span class="ml-2 text-base font-medium" [class]="change() >= 0 ? 'text-[#3f9f22]' : 'text-[#e2001a]'">
+            {{ change() >= 0 ? '+' : '' }}{{ change().toFixed(2) }} %
+          </span>
+          <span class="ml-1 text-xs font-normal text-muted-foreground">sur la période</span>
+        </p>
+      }
+    </div>
+
+    <div class="flex gap-1">
+      @for (r of ranges; track r.value) {
+        <button hlmBtn size="sm" [variant]="range() === r.value ? 'default' : 'outline'" (click)="load(r.value)">{{ r.label }}</button>
+      }
+    </div>
+  </header>
+
+  @if (error()) {
+    <p role="alert" class="mb-2 text-sm text-destructive">Données de marché indisponibles, réessayez plus tard.</p>
+  }
+
+  <div #chart data-testid="chart" class="h-96 w-full"></div>
+  <p class="mt-2 text-xs text-muted-foreground">Source : Yahoo Finance — cours différés, à titre indicatif.</p>
+</section>

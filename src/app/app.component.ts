@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { StockChartComponent } from './stock-chart/stock-chart.component';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, HlmButtonImports],
+    imports: [RouterOutlet, StockChartComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
