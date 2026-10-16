@@ -19,7 +19,7 @@
     <label class="flex flex-col gap-1 text-sm">Date d'achat
       <input name="purchasedAt" type="date" required [(ngModel)]="form.purchasedAt" class="rounded-md border px-3 py-2" />
     </label>
-    <button hlmBtn type="submit" [disabled]="f.invalid">{{ editingId() === null ? 'Ajouter' : 'Enregistrer' }}</button>
+    <button hlmBtn type="submit" [disabled]="f.invalid || saving() || !(form.quantity! > 0)">{{ editingId() === null ? 'Ajouter' : 'Enregistrer' }}</button>
     @if (editingId() !== null) {
       <button hlmBtn type="button" variant="outline" (click)="cancel()">Annuler</button>
     }

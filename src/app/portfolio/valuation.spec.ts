@@ -22,6 +22,12 @@ describe('valuePositions', () => {
     ]);
   });
 
+  it('does not flag partial while a quote is still loading', () => {
+    const { rows, partial } = valuePositions([pos(1, 'AMUN.PA', 10, 50)], {});
+    expect(rows[0].value).toBeUndefined();
+    expect(partial).toBeFalse();
+  });
+
   it('excludes a position without quote from the totals and flags them partial', () => {
     const { rows, totals, partial } = valuePositions([pos(1, 'AMUN.PA', 10, 50), pos(2, 'XXX', 5, 10)], { 'AMUN.PA': { price: 60, currency: 'EUR' }, XXX: null });
     expect(rows[1].value).toBeUndefined();

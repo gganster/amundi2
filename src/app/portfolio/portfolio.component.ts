@@ -9,6 +9,9 @@ import { Position, Price, valuePositions } from './valuation';
 // ticker -> chart route, derived from the routes (no duplicated symbols).
 const chartPaths = new Map(routes.filter((r) => r.data?.['symbol']).map((r) => [r.data!['symbol'] as string, r.path!]));
 
+// Same order as the server (purchase date, then id, newest first), so the list does not move on reload.
+const sortPositions = (list: Position[]) => [...list].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt) || b.id - a.id);
+
 const emptyForm = () => ({ ticker: '', quantity: null as number | null, unitCost: null as number | null, purchasedAt: '' });
 
 @Component({
@@ -23,6 +26,7 @@ export class PortfolioComponent {
   // undefined: still loading, null: quote unavailable.
   readonly prices = signal<Record<string, Price | null>>({});
   readonly loading = signal(true);
+  readonly saving = signal(false);
   readonly error = signal('');
   readonly formError = signal('');
   readonly editingId = signal<number | null>(null);
@@ -55,7 +59,7 @@ export class PortfolioComponent {
   private load() {
     this.http.get<Position[]>('/api/portfolio/positions').subscribe({
       next: (list) => {
-        this.positions.set(list);
+        this.positions.set(sortPositions(list));
         this.loading.set(false);
         this.loadPrices(list);
       },
@@ -70,7 +74,7 @@ export class PortfolioComponent {
   private loadPrices(list: Position[]) {
     for (const ticker of new Set(list.map((p) => p.ticker))) {
       if (this.prices()[ticker]) continue;
-      this.http.get<{ price: number; currency: string }>(`/api/quotes/${encodeURIComponent(ticker)}`, { params: { range: '1mo' } }).subscribe({
+      this.http.get<Price>(`/api/quotes/${encodeURIComponent(ticker)}`, { params: { range: '1mo' } }).subscribe({
         next: (q) => this.prices.update((p) => ({ ...p, [ticker]: { price: q.price, currency: q.currency } })),
         error: () => this.prices.update((p) => ({ ...p, [ticker]: null })),
       });
@@ -92,16 +96,21 @@ export class PortfolioComponent {
     const id = this.editingId();
     const body = { ...this.form, ticker: this.form.ticker.trim().toUpperCase() };
     this.formError.set('');
+    this.saving.set(true);
     const req = id === null
       ? this.http.post<Position>('/api/portfolio/positions', body)
       : this.http.put<Position>(`/api/portfolio/positions/${id}`, body);
     req.subscribe({
       next: (saved) => {
-        this.positions.update((list) => (id === null ? [saved, ...list] : list.map((p) => (p.id === id ? saved : p))));
+        this.saving.set(false);
+        this.positions.update((list) => sortPositions(id === null ? [saved, ...list] : list.map((p) => (p.id === id ? saved : p))));
         this.loadPrices([saved]);
         this.cancel();
       },
-      error: (e) => this.formError.set(e.status === 400 ? 'Valeurs invalides : vérifiez le symbole (ex. AMUN.PA), la quantité (> 0), le prix (≥ 0) et la date.' : 'Enregistrement impossible, réessayez plus tard.'),
+      error: (e) => {
+        this.saving.set(false);
+        this.formError.set(e.status === 400 ? 'Valeurs invalides : vérifiez le symbole (ex. AMUN.PA), la quantité (> 0), le prix (≥ 0) et la date.' : 'Enregistrement impossible, réessayez plus tard.');
+      },
     });
   }
 
