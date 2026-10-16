@@ -1,0 +1,95 @@
+<h1 class="mb-4 text-2xl font-bold">Portefeuille</h1>
+
+@if (error()) {
+  <p role="alert" class="mb-3 text-sm text-destructive">{{ error() }}</p>
+}
+
+<section class="mb-6 rounded-xl border bg-card p-4 shadow-sm">
+  <h2 class="mb-3 text-lg font-semibold">{{ editingId() === null ? 'Ajouter une position' : 'Modifier la position' }}</h2>
+  <form #f="ngForm" (ngSubmit)="save()" class="flex flex-wrap items-end gap-3">
+    <label class="flex flex-col gap-1 text-sm">Symbole
+      <input name="ticker" required placeholder="AMUN.PA" [(ngModel)]="form.ticker" class="w-32 rounded-md border px-3 py-2 uppercase" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">Quantité
+      <input name="quantity" type="number" required min="0" step="any" [(ngModel)]="form.quantity" class="w-28 rounded-md border px-3 py-2" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">Prix de revient unitaire
+      <input name="unitCost" type="number" required min="0" step="any" [(ngModel)]="form.unitCost" class="w-36 rounded-md border px-3 py-2" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">Date d'achat
+      <input name="purchasedAt" type="date" required [(ngModel)]="form.purchasedAt" class="rounded-md border px-3 py-2" />
+    </label>
+    <button hlmBtn type="submit" [disabled]="f.invalid">{{ editingId() === null ? 'Ajouter' : 'Enregistrer' }}</button>
+    @if (editingId() !== null) {
+      <button hlmBtn type="button" variant="outline" (click)="cancel()">Annuler</button>
+    }
+  </form>
+  @if (formError()) {
+    <p role="alert" class="mt-2 text-sm text-destructive">{{ formError() }}</p>
+  }
+  <p class="mt-2 text-xs text-muted-foreground">Le prix de revient est supposé exprimé dans la devise du cours (EUR pour un symbole en .PA, USD pour AAPL). Aucune conversion de devise n'est faite.</p>
+</section>
+
+@if (loading()) {
+  <p class="text-sm text-muted-foreground">Chargement…</p>
+} @else if (positions().length === 0) {
+  <p class="text-sm text-muted-foreground">Aucune position pour l'instant.</p>
+} @else {
+  @let v = valuation();
+  <div class="overflow-x-auto rounded-xl border bg-card shadow-sm">
+    <table class="w-full text-sm tabular-nums">
+      <thead class="border-b text-left text-muted-foreground">
+        <tr>
+          <th class="p-3">Symbole</th>
+          <th class="p-3 text-right">Quantité</th>
+          <th class="p-3 text-right">Prix de revient</th>
+          <th class="p-3 text-right">Cours</th>
+          <th class="p-3 text-right">Valeur</th>
+          <th class="p-3 text-right">+/- value</th>
+          <th class="p-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of v.rows; track r.position.id) {
+          <tr class="border-b last:border-0" data-testid="position-row">
+            <td class="p-3 font-medium">
+              @if (chartPath(r.position.ticker); as path) {
+                <a [routerLink]="'/' + path" class="underline" title="Voir le graphique">{{ r.position.ticker }}</a>
+              } @else {
+                {{ r.position.ticker }}
+              }
+            </td>
+            <td class="p-3 text-right">{{ r.position.quantity }}</td>
+            <td class="p-3 text-right">{{ money(r.position.unitCost, r.currency) }}</td>
+            @if (r.price !== undefined) {
+              <td class="p-3 text-right">{{ money(r.price, r.currency) }}</td>
+              <td class="p-3 text-right">{{ money(r.value!, r.currency) }}</td>
+              <td class="p-3 text-right" [class]="r.gain! >= 0 ? 'text-[#3f9f22]' : 'text-[#e2001a]'">
+                {{ money(r.gain!, r.currency) }}
+                @if (r.gainPct !== undefined) { <span>({{ pct(r.gainPct) }})</span> }
+              </td>
+            } @else {
+              <td class="p-3 text-right text-muted-foreground" colspan="3">{{ prices()[r.position.ticker] === null ? 'cours indisponible' : 'chargement du cours…' }}</td>
+            }
+            <td class="p-3 text-right whitespace-nowrap">
+              <button hlmBtn variant="ghost" size="sm" (click)="edit(r.position)">Modifier</button>
+              <button hlmBtn variant="ghost" size="sm" (click)="remove(r.position)">Supprimer</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <section class="mt-6 rounded-xl border bg-card p-4 shadow-sm" data-testid="totals">
+    <h2 class="mb-2 text-lg font-semibold">Totaux @if (v.partial) { <span class="text-sm font-normal text-destructive">(partiels : des cours sont indisponibles)</span> }</h2>
+    @for (t of v.totals; track t.currency) {
+      <p class="tabular-nums">
+        <span class="font-medium">{{ t.currency }}</span> — valeur {{ money(t.value, t.currency) }}, investi {{ money(t.cost, t.currency) }},
+        <span [class]="t.gain >= 0 ? 'text-[#3f9f22]' : 'text-[#e2001a]'">{{ money(t.gain, t.currency) }} ({{ pct(t.gainPct) }})</span>
+      </p>
+    } @empty {
+      <p class="text-sm text-muted-foreground">Aucun cours disponible.</p>
+    }
+  </section>
+}
