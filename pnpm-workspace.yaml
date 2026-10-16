@@ -1,0 +1,9 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true
+  nx: false
+  better-sqlite3: true
+  '@prisma/engines': true
+  prisma: true

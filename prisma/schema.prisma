@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../server/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Placeholder model, replace with the real domain.
+model Note {
+  id        Int      @id @default(autoincrement())
+  text      String
+  createdAt DateTime @default(now())
+}
