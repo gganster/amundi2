@@ -10,7 +10,7 @@ Angular 21 (standalone components, no NgModules; upgraded from 17) with SSR via 
 
 - `pnpm start` — full dev: `concurrently` runs `ng build --watch` (rebuilds the server bundle), `node --watch` on the built Express server (:4000, API + SSR) and `ng serve` (:4200, live reload; `/api` proxied to :4000 via `proxy.conf.json`). The first seconds show API errors until the first build finishes. `pnpm start:web` = `ng serve` only (no `/api`)
 - `pnpm build` — production build to `dist/amundi2/{browser,server}`
-- `pnpm serve:ssr:amundi2` — run the built Express server on :4000 (`PORT` env to override); required to exercise `/api/*` routes
+- `pnpm serve:ssr:amundi2` — run the built Express server on :4000 (`PORT` env to override); required to exercise `/api/*` routes. `JWT_SECRET` (32+ chars) is required, or the server refuses to start (`pnpm start` loads a dev one from `.env.development`); set `NODE_ENV=production` behind HTTPS so session cookies are `Secure`
 - `pnpm test` — Karma in watch mode; single run: `npx ng test --watch=false`; one spec: `npx ng test --include='src/app/app.component.spec.ts'`
 
 - `pnpm lint` — ESLint on `src/`, `server/`, `server.ts` (`libs/` and `server/generated/` ignored)

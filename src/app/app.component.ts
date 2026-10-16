@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, afterNextRender, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { routes } from './app.routes';
+import { AuthService } from './auth/auth.service';
 
 @Component({
     selector: 'app-root',
@@ -12,4 +13,24 @@ import { routes } from './app.routes';
 export class AppComponent {
   title = 'amundi2';
   readonly links = routes.filter((r) => r.data).map((r) => ({ path: r.path!, label: r.data!['label'] as string }));
+  readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  constructor() {
+    // Restore the signed-in user (cookie) for the menu unless the route guard already did; a 401 just means signed out.
+    // Never runs during SSR.
+    afterNextRender(() => {
+      if (!this.auth.user()) this.auth.me().subscribe({ error: () => undefined });
+    });
+  }
+
+  readonly logoutFailed = signal(false);
+
+  logout() {
+    this.logoutFailed.set(false);
+    this.auth.logout().subscribe({
+      next: () => this.router.navigateByUrl('/connexion'),
+      error: () => this.logoutFailed.set(true),
+    });
+  }
 }
