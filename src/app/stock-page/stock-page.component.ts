@@ -6,7 +6,7 @@ import { StockChartComponent } from '../stock-chart/stock-chart.component';
   selector: 'app-stock-page',
   imports: [StockChartComponent],
   template: `
-    <h1 class="mb-4 text-2xl font-bold">Tableau de bord — action {{ label }}</h1>
+    <h1 class="mb-4 text-3xl font-bold tracking-tight text-primary">Tableau de bord — action {{ label }}</h1>
     <app-stock-chart [symbol]="symbol" [label]="label" />
   `,
 })

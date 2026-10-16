@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnDestroy, afterNextRender, computed, inject, input, signal, viewChild } from '@angular/core';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { Component, ElementRef, OnDestroy, afterNextRender, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import type { CandlestickData, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
+import { ThemeService } from '../theme.service';
 
 interface Quote {
   name: string;
@@ -24,13 +24,19 @@ const RANGES = [
 const UP = '#3f9f22';
 const DOWN = '#e2001a';
 
+// Axis/grid colors per theme (same as the design mock).
+const chartColors = (dark: boolean) => ({
+  layout: { background: { color: 'transparent' }, textColor: dark ? '#9fb0c8' : '#64748b', attributionLogo: false },
+  grid: { vertLines: { color: dark ? 'rgba(255,255,255,.1)' : '#e3e9f3' }, horzLines: { color: dark ? 'rgba(255,255,255,.1)' : '#e3e9f3' } },
+});
+
 @Component({
   selector: 'app-stock-chart',
-  imports: [HlmButtonImports],
   templateUrl: './stock-chart.component.html',
 })
 export class StockChartComponent implements OnDestroy {
   private readonly http = inject(HttpClient);
+  private readonly theme = inject(ThemeService);
   private readonly host = viewChild.required<ElementRef<HTMLDivElement>>('chart');
 
   readonly symbol = input.required<string>();
@@ -55,8 +61,7 @@ export class StockChartComponent implements OnDestroy {
       const { createChart, CandlestickSeries } = await import('lightweight-charts');
       this.chart = createChart(this.host().nativeElement, {
         autoSize: true,
-        layout: { background: { color: 'transparent' }, textColor: '#6b7280', attributionLogo: false },
-        grid: { vertLines: { color: '#e5e7eb' }, horzLines: { color: '#e5e7eb' } },
+        ...chartColors(this.theme.dark()),
         rightPriceScale: { borderVisible: false },
         timeScale: { borderVisible: false },
       });
@@ -66,6 +71,7 @@ export class StockChartComponent implements OnDestroy {
       });
       this.load(this.range());
     });
+    effect(() => this.chart?.applyOptions(chartColors(this.theme.dark())));
   }
 
   load(range: string) {
