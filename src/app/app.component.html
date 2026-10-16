@@ -1,6 +1,8 @@
-<main class="mx-auto max-w-5xl p-6">
-  <h1 class="mb-4 text-2xl font-bold">Tableau de bord — action Amundi</h1>
-  <app-stock-chart />
-</main>
-
-<router-outlet />
+<nav class="border-b">
+  <ul class="mx-auto flex max-w-5xl flex-wrap gap-1 p-2">
+    @for (l of links; track l.path) {
+      <li><a hlmBtn variant="ghost" size="sm" [routerLink]="l.path" routerLinkActive="bg-accent">{{ l.label }}</a></li>
+    }
+  </ul>
+</nav>
+<main class="mx-auto max-w-5xl p-6"><router-outlet /></main>

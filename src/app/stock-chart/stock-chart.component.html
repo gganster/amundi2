@@ -1,7 +1,7 @@
 <section class="rounded-xl border bg-card p-4 shadow-sm">
   <header class="mb-4 flex flex-wrap items-end justify-between gap-3">
     <div>
-      <h2 class="text-lg font-semibold">{{ quote()?.name ?? 'Amundi' }} <span class="text-sm font-normal text-muted-foreground">{{ quote()?.symbol ?? 'AMUN.PA' }}</span></h2>
+      <h2 class="text-lg font-semibold">{{ quote()?.name ?? label() }} <span class="text-sm font-normal text-muted-foreground">{{ quote()?.symbol ?? symbol() }}</span></h2>
       @if (quote(); as q) {
         <p data-testid="price" class="text-3xl font-bold tabular-nums">
           {{ q.price.toFixed(2) }} {{ q.currency }}

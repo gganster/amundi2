@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnDestroy, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, afterNextRender, computed, inject, input, signal, viewChild } from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import type { CandlestickData, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 
@@ -32,6 +32,9 @@ const DOWN = '#e2001a';
 export class StockChartComponent implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly host = viewChild.required<ElementRef<HTMLDivElement>>('chart');
+
+  readonly symbol = input.required<string>();
+  readonly label = input<string>();
 
   readonly ranges = RANGES;
   readonly range = signal('3mo');
@@ -67,7 +70,7 @@ export class StockChartComponent implements OnDestroy {
 
   load(range: string) {
     this.range.set(range);
-    this.http.get<Quote>('/api/quotes/amundi', { params: { range } }).subscribe({
+    this.http.get<Quote>(`/api/quotes/${encodeURIComponent(this.symbol())}`, { params: { range } }).subscribe({
       next: (q) => {
         this.error.set(false);
         this.quote.set(q);
