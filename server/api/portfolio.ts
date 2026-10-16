@@ -62,7 +62,13 @@ portfolio.put('/positions/:id', async (req, res, next) => {
       res.status(404).json({ error: 'not found' });
       return;
     }
-    res.json(await prisma.position.findUnique({ where: { id } }));
+    // Deleted between the two queries: same answer as a missing position.
+    const updated = await prisma.position.findUnique({ where: { id } });
+    if (!updated) {
+      res.status(404).json({ error: 'not found' });
+      return;
+    }
+    res.json(updated);
   } catch (err) {
     next(err);
   }
