@@ -27,6 +27,8 @@ api.get('/notes', async (_req, res, next) => {
 });
 
 // JSON errors only (malformed body, unexpected failure): never an HTML page or a stack trace.
+// Express identifies error handlers by their 4 parameters, so `_next` must stay.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onError: ErrorRequestHandler = (err, _req, res, _next) => {
   const status = Number.isInteger(err?.status) && err.status >= 400 && err.status < 500 ? err.status : 500;
   if (status === 500) console.error(err);

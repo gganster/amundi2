@@ -1,8 +1,16 @@
 <nav class="border-b">
-  <ul class="mx-auto flex max-w-5xl flex-wrap gap-1 p-2">
+  <ul class="mx-auto flex max-w-5xl flex-wrap items-center gap-1 p-2">
     @for (l of links; track l.path) {
       <li><a hlmBtn variant="ghost" size="sm" [routerLink]="l.path" routerLinkActive="bg-accent">{{ l.label }}</a></li>
     }
+    <li class="ml-auto flex items-center gap-2">
+      @if (auth.user(); as u) {
+        <span class="text-sm text-muted-foreground">{{ u.email }}</span>
+        <button hlmBtn variant="outline" size="sm" (click)="logout()">Déconnexion</button>
+      } @else {
+        <a hlmBtn variant="ghost" size="sm" routerLink="/connexion" routerLinkActive="bg-accent">Connexion</a>
+      }
+    </li>
   </ul>
 </nav>
 <main class="mx-auto max-w-5xl p-6"><router-outlet /></main>
