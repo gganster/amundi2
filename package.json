@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "concurrently -k -n build,api,web \"ng build --watch --configuration development\" \"node --watch dist/amundi2/server/server.mjs\" \"ng serve\"",
+    "start": "concurrently -k -n build,api,web \"ng build --watch --configuration development\" \"node --watch --env-file=.env.development dist/amundi2/server/server.mjs\" \"ng serve\"",
     "start:web": "ng serve",
     "build": "ng build",
     "postinstall": "prisma generate",

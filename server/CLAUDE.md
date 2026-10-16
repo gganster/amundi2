@@ -4,10 +4,11 @@ Code Express (BFF/API + SSR) importé par `../server.ts`, qui reste le point d'e
 
 ## Layout
 
-- `config.ts` — chemins dist (`browserDistFolder`, `indexHtml`), `port`, `allowedHosts` (SSR, env `ALLOWED_HOSTS`), `databaseUrl` (env `DATABASE_URL`). Seul endroit qui lit `import.meta.url` / `process.env`.
+- `config.ts` — chemins dist (`browserDistFolder`, `indexHtml`), `port`, `allowedHosts` (SSR, env `ALLOWED_HOSTS`), `databaseUrl` (env `DATABASE_URL`), `secureCookies` (vrai si `NODE_ENV=production`), `jwtSecret` (env `JWT_SECRET`, 32 caractères minimum, **obligatoire** : le démarrage échoue sans lui ; `pnpm start` le lit dans `.env.development`). Seul endroit qui lit `import.meta.url` / `process.env`.
 - `db.ts` — singleton `prisma` (Prisma 7 + adapter `better-sqlite3`). Schéma dans `../prisma/schema.prisma`.
 - `generated/` — client Prisma généré (gitignoré, recréé par `postinstall`). Ne pas éditer ni linter.
 - `ssr.ts` — handler Angular `CommonEngine` (catch-all).
+- `middleware/auth.ts` — session JWT (cookie `session`, HS256, 7 j) : `signSession`, `set/clearSessionCookie`, `requireAuth` (pose `res.locals.userId`, sinon 401). Partagé par `api/auth.ts` et `api/portfolio.ts`.
 - `api/index.ts` — `Router` monté sur `/api`; un fichier par domaine (`api/<domaine>.ts`), enregistré via `api.use('/<domaine>', router)`.
 
 ## Conventions
@@ -27,6 +28,6 @@ Code Express (BFF/API + SSR) importé par `../server.ts`, qui reste le point d'e
 `pnpm start` n'exécute pas ce code. Utiliser :
 
 ```
-pnpm build && PORT=4011 pnpm serve:ssr:amundi2
+pnpm build && JWT_SECRET=<32+ caractères> PORT=4011 pnpm serve:ssr:amundi2
 curl localhost:4011/api/health
 ```
