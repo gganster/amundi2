@@ -5,6 +5,7 @@
     }
     <li class="ml-auto flex items-center gap-2">
       @if (auth.user(); as u) {
+        @if (logoutFailed()) { <span role="alert" class="text-sm text-destructive">Déconnexion impossible, réessayez.</span> }
         <span class="text-sm text-muted-foreground">{{ u.email }}</span>
         <button hlmBtn variant="outline" size="sm" (click)="logout()">Déconnexion</button>
       } @else {

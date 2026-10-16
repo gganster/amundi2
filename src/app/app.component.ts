@@ -1,4 +1,4 @@
-import { Component, afterNextRender, inject } from '@angular/core';
+import { Component, afterNextRender, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { routes } from './app.routes';
@@ -17,11 +17,20 @@ export class AppComponent {
   private readonly router = inject(Router);
 
   constructor() {
-    // Restore the signed-in user (cookie) for the menu; a 401 just means signed out. Never runs during SSR.
-    afterNextRender(() => this.auth.me().subscribe({ error: () => undefined }));
+    // Restore the signed-in user (cookie) for the menu unless the route guard already did; a 401 just means signed out.
+    // Never runs during SSR.
+    afterNextRender(() => {
+      if (!this.auth.user()) this.auth.me().subscribe({ error: () => undefined });
+    });
   }
 
+  readonly logoutFailed = signal(false);
+
   logout() {
-    this.auth.logout().subscribe(() => this.router.navigateByUrl('/connexion'));
+    this.logoutFailed.set(false);
+    this.auth.logout().subscribe({
+      next: () => this.router.navigateByUrl('/connexion'),
+      error: () => this.logoutFailed.set(true),
+    });
   }
 }
